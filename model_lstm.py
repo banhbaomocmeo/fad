@@ -36,9 +36,9 @@ skf = StratifiedKFold(n_splits=kfold_splits, shuffle=True)
 test = np.loadtxt('fad.pssm.ws17.tst.csv', delimiter=',')
 train = np.loadtxt('fad.pssm.ws17.trn.csv', delimiter=',')
 
-X = train[:, 1:].reshape(-1,340,1)
+X = train[:, 1:].reshape(-1,17,20)
 y = train[:, 0]
-X_test_r = test[:, 1:].reshape(-1,340,1)
+X_test_r = test[:, 1:].reshape(-1,17,20)
 y_test = test[:, 0]
 
 X = normalize_data(X)
@@ -59,7 +59,7 @@ for index, (train_indices, val_indices) in enumerate(skf.split(X, y)):
     init = glorot_uniform(seed=seed)
     reg = l2(0.001)
 
-    model.add(LSTM(units=100, recurrent_dropout=0.2, dropout=0.2, input_shape=[340,1]))
+    model.add(LSTM(units=100, recurrent_dropout=0.2, dropout=0.2, input_shape=[17,20]))
 
     model.add(Dense(2, kernel_initializer=init, kernel_regularizer=reg))
     model.add(Activation('softmax'))
