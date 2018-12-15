@@ -81,7 +81,7 @@ for index, (train_indices, val_indices) in enumerate(skf.split(X, y)):
     model.add(Activation('softmax'))
 
     tbCallBack = TrainValTensorBoard(log_dir='./cnn_balance/seed_{}/fold_{}/logs'.format(seed, index), histogram_freq=0, write_graph=True)
-    ckptCallBack =  ModelCheckpoint(filepath='./cnn_balance/seed_{}/fold_{}/logs'.format(seed, index), monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+    ckptCallBack =  ModelCheckpoint(filepath='./cnn_balance/seed_{}/fold_{}/logs/best.h5'.format(seed, index), monitor='val_acc', verbose=1, save_best_only=True, mode='max')
     model.compile(loss='categorical_crossentropy',optimizer=Adam(),metrics=['accuracy'])
     model.summary()
 

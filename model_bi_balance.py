@@ -68,8 +68,8 @@ for index, (train_indices, val_indices) in enumerate(skf.split(X, y)):
     model.add(Dropout(0.25))
     model.add(Dense(2, kernel_initializer=init, kernel_regularizer=reg))
     model.add(Activation('softmax'))
-    tbCallBack = TrainValTensorBoard(log_dir='./lstm_balance/seed_{}/fold_{}/logs'.format(seed, index), histogram_freq=0, write_graph=True)
-    ckptCallBack =  ModelCheckpoint(filepath='./lstm_balance/seed_{}/fold_{}/logs'.format(seed, index), monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+    tbCallBack = TrainValTensorBoard(log_dir='./bi_balance/seed_{}/fold_{}/logs'.format(seed, index), histogram_freq=0, write_graph=True)
+    ckptCallBack =  ModelCheckpoint(filepath='./bi_balance/seed_{}/fold_{}/logs/best.h5'.format(seed, index), monitor='val_acc', verbose=1, save_best_only=True, mode='max')
     model.compile(loss='categorical_crossentropy',optimizer=Adam(),metrics=['accuracy'])
     model.summary()
 
@@ -83,11 +83,11 @@ for index, (train_indices, val_indices) in enumerate(skf.split(X, y)):
 
     #metrics
     y_pred = model.predict(X_test_r)
-    np.save('./lstm_balance/seed_{}/fold_{}/pred.npy'.format(seed, index), [y_test, y_pred])
+    np.save('./bi_balance/seed_{}/fold_{}/pred.npy'.format(seed, index), [y_test, y_pred])
 
     #save model
     model_json = model.to_json()
-    with open("./lstm_balance/seed_{}/fold_{}/model.json".format(seed, index), "w") as json_file:
+    with open("./bi_balance/seed_{}/fold_{}/model.json".format(seed, index), "w") as json_file:
         json_file.write(model_json)
-    model.save_weights("./lstm_balance/seed_{}/fold_{}/model.h5".format(seed, index))
+    model.save_weights("./bi_balance/seed_{}/fold_{}/model.h5".format(seed, index))
     print("Saved model to disk")
