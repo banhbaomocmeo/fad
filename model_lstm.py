@@ -74,7 +74,7 @@ for index, (train_indices, val_indices) in enumerate(skf.split(X, y)):
             batch_size=32, 
             callbacks=[tbCallBack], 
             class_weight = {0: 0.5, 1: 9.5})
-
+    model.summary()
     #metrics
     y_pred = model.predict(X_test_r)
     np.save('./lstm/seed_{}/fold_{}/pred.npy'.format(seed, index), [y_test, y_pred])
