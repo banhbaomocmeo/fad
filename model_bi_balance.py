@@ -5,7 +5,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 import tensorflow as tf
 import keras
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Flatten, MaxPooling1D, Conv1D
+from keras.layers import Dense, Dropout, Activation, Flatten, LSTM, Bidirectional, GlobalMaxPool1D
 from keras.optimizers import Adam
 from keras.utils.np_utils import to_categorical
 from keras.callbacks import ModelCheckpoint
@@ -56,36 +56,24 @@ for index, (train_indices, val_indices) in enumerate(skf.split(X, y)):
     y_train, y_val = (to_categorical(y[train_indices], num_classes=2), to_categorical(y[val_indices], num_classes=2))
     
     train_gen = DataGenerator(X_train_r, y_train, batch_size)
-    # val_gen = DataGenerator(X_val_r, y_val, batch_size)
 
     #build
     model = Sequential()
     init = glorot_uniform(seed=seed)
     reg = l2(0.001)
 
-    model.add(Conv1D(filters=32, kernel_size=5, padding='same', input_shape=(17,20), kernel_initializer=init, kernel_regularizer=reg))
-    model.add(Activation('relu'))
-    model.add(MaxPooling1D(pool_size=2, strides=None, padding='same'))
-    model.add(Conv1D(filters=64, kernel_size=3, padding='same', kernel_initializer=init, kernel_regularizer=reg))
-    model.add(Activation('relu'))
-    model.add(MaxPooling1D(pool_size=2, strides=None, padding='same'))
-    model.add(Conv1D(filters=128, kernel_size=3, padding='same', kernel_initializer=init, kernel_regularizer=reg))
-    model.add(Activation('relu'))
-
-    model.add(Flatten())
-    model.add(Dropout(0.4, seed=seed))
-    model.add(Dense(128, kernel_initializer=init, kernel_regularizer=reg))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.4, seed=seed))
+    model.add(Bidirectional(LSTM(units=100, recurrent_dropout=0.1, dropout=0.25, input_shape=[17,20])))
+    model.add(GlobalMaxPool1D())
+    model.add(Dense(100, activation="relu"))
+    model.add(Dropout(0.25))
     model.add(Dense(2, kernel_initializer=init, kernel_regularizer=reg))
     model.add(Activation('softmax'))
-
-    tbCallBack = TrainValTensorBoard(log_dir='./cnn_balance/seed_{}/fold_{}/logs'.format(seed, index), histogram_freq=0, write_graph=True)
-    ckptCallBack =  ModelCheckpoint(filepath='./cnn_balance/seed_{}/fold_{}/logs'.format(seed, index), monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+    tbCallBack = TrainValTensorBoard(log_dir='./lstm_balance/seed_{}/fold_{}/logs'.format(seed, index), histogram_freq=0, write_graph=True)
+    ckptCallBack =  ModelCheckpoint(filepath='./lstm_balance/seed_{}/fold_{}/logs'.format(seed, index), monitor='val_acc', verbose=1, save_best_only=True, mode='max')
     model.compile(loss='categorical_crossentropy',optimizer=Adam(),metrics=['accuracy'])
     model.summary()
 
-    nb_epoch = 20
+    nb_epoch = 10
     model.fit_generator(train_gen,  
             epochs=nb_epoch,
             validation_data=(X_val_r, y_val), 
@@ -95,11 +83,11 @@ for index, (train_indices, val_indices) in enumerate(skf.split(X, y)):
 
     #metrics
     y_pred = model.predict(X_test_r)
-    np.save('./cnn_balance/seed_{}/fold_{}/pred.npy'.format(seed, index), [y_test, y_pred])
+    np.save('./lstm_balance/seed_{}/fold_{}/pred.npy'.format(seed, index), [y_test, y_pred])
 
     #save model
     model_json = model.to_json()
-    with open("./cnn_balance/seed_{}/fold_{}/model.json".format(seed, index), "w") as json_file:
+    with open("./lstm_balance/seed_{}/fold_{}/model.json".format(seed, index), "w") as json_file:
         json_file.write(model_json)
-    model.save_weights("./cnn_balance/seed_{}/fold_{}/model.h5".format(seed, index))
+    model.save_weights("./lstm_balance/seed_{}/fold_{}/model.h5".format(seed, index))
     print("Saved model to disk")

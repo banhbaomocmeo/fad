@@ -1,7 +1,7 @@
 from metrics import ultimate_metrics 
 import numpy as np 
 
-y = np.load('pred.npy')
+y = np.load('lstm/pred.npy')
 # print(y)
 # print(y.shape)
 # print(max(y[1]), min(y[1]))
