@@ -72,7 +72,7 @@ for index, (train_indices, val_indices) in enumerate(skf.split(X, y)):
     model.compile(loss='categorical_crossentropy',optimizer=Adam(),metrics=['accuracy'])
     model.summary()
 
-    nb_epoch = 10
+    nb_epoch = 20
     model.fit_generator(train_gen,  
             epochs=nb_epoch,
             validation_data=(X_val_r, y_val), 
