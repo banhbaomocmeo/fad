@@ -70,6 +70,7 @@ for index, (train_indices, val_indices) in enumerate(skf.split(X, y)):
     tbCallBack = TrainValTensorBoard(log_dir='./lstm_balance/seed_{}/fold_{}/logs'.format(seed, index), histogram_freq=0, write_graph=True)
     ckptCallBack =  ModelCheckpoint(filepath='./lstm_balance/seed_{}/fold_{}/logs'.format(seed, index), monitor='val_acc', verbose=1, save_best_only=True, mode='max')
     model.compile(loss='categorical_crossentropy',optimizer=Adam(),metrics=['accuracy'])
+    model.summary()
 
     nb_epoch = 10
     model.fit_generator(train_gen,  
@@ -78,7 +79,6 @@ for index, (train_indices, val_indices) in enumerate(skf.split(X, y)):
             callbacks=[tbCallBack, ckptCallBack], 
             class_weight={0: 0.4, 1: 0.6}
             )
-    model.summary()
 
     #metrics
     y_pred = model.predict(X_test_r)
