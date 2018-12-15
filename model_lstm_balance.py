@@ -62,7 +62,7 @@ for index, (train_indices, val_indices) in enumerate(skf.split(X, y)):
     init = glorot_uniform(seed=seed)
     reg = l2(0.001)
 
-    model.add(LSTM(units=100, recurrent_dropout=0.2, dropout=0.2, input_shape=[17,20]))
+    model.add(LSTM(units=100, recurrent_dropout=0.2, dropout=0.2, kernel_initializer=init, input_shape=[17,20]))
 
     model.add(Dense(2, kernel_initializer=init, kernel_regularizer=reg))
     model.add(Activation('softmax'))

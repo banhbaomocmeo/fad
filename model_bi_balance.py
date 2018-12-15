@@ -62,10 +62,10 @@ for index, (train_indices, val_indices) in enumerate(skf.split(X, y)):
     init = glorot_uniform(seed=seed)
     reg = l2(0.001)
 
-    model.add(Bidirectional(LSTM(units=100, recurrent_dropout=0.1, dropout=0.25, input_shape=[17,20])))
+    model.add(Bidirectional(LSTM(units=100, return_sequences=True, recurrent_dropout=0.1, dropout=0.25, kernel_initializer=init), input_shape=[17,20]))
     model.add(GlobalMaxPool1D())
-    model.add(Dense(100, activation="relu"))
-    model.add(Dropout(0.25))
+    model.add(Dense(100, activation="relu", kernel_initializer=init, kernel_regularizer=reg))
+    model.add(Dropout(0.25, seed=seed))
     model.add(Dense(2, kernel_initializer=init, kernel_regularizer=reg))
     model.add(Activation('softmax'))
     tbCallBack = TrainValTensorBoard(log_dir='./bi_balance/seed_{}/fold_{}/logs'.format(seed, index), histogram_freq=0, write_graph=True)
