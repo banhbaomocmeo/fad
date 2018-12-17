@@ -1,7 +1,14 @@
 from metrics import ultimate_metrics, ultimate_metrics_parse
 import numpy as np 
+import tensorflow as tf
 from keras.models import model_from_json
 from keras.utils.np_utils import to_categorical
+from keras.backend import set_session
+#config
+config = tf.ConfigProto(allow_soft_placement=True, log_device_placement=True)
+config.gpu_options.allow_growth = True
+sess = tf.Session(config=config) 
+set_session(sess)
 
 
 def normalize_data(x):
@@ -42,7 +49,7 @@ for m in ms:
     y_pred_ass = []
     for r in np.array(pred_assembles).T.astype(np.int):
       y_pred_ass.append(np.bincount(r).argmax())
-    sn, sp, acc, mcc, auc, fpr, tpr = ultimate_metrics(y_test_p, np.array(y_pred_ass))
+    sn, sp, acc, mcc, auc, fpr, tpr = ultimate_metrics_parse(y_test_p, np.array(y_pred_ass))
     m_s.append([sn, sp, acc, mcc, auc, fpr[1], tpr[1]])
     m_m.append(m_s)
   metrics.append(m_m)
