@@ -37,3 +37,14 @@ def ultimate_metrics(y_truth, y_pred):
     auc = auc_score(y_truth, y_pred)
     fpr, tpr = roc(y_parse, y_round)
     return sn, sp, acc, mcc, auc, fpr, tpr
+
+def ultimate_metrics_parse(y_truth, y_pred):
+    
+    conf_mat = metrics.confusion_matrix(y_truth, y_pred).ravel() #tn, fp, fn, tp
+    sn = sensitivity(conf_mat)
+    sp = specificity(conf_mat)
+    acc = accuracy(conf_mat)
+    mcc = matthews_correlation_coefficient(conf_mat)
+    auc = auc_score(y_truth, y_pred)
+    fpr, tpr = roc(y_truth, y_pred)
+    return sn, sp, acc, mcc, auc, fpr, tpr
