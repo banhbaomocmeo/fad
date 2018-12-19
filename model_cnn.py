@@ -14,14 +14,11 @@ from keras.initializers import glorot_uniform
 from keras.regularizers import l2
 from keras.models import model_from_json
 from sklearn.model_selection import StratifiedKFold
-from tensorboard import TrainValTensorBoard
+from tensorboard import TrainValTensorBoard, ModelCheckpoint
+from ultis import as_keras_metric, normalize_data
 
 seed = 1997
 kfold_splits = 5
-
-def normalize_data(x):
-    return 1 / (1 + np.exp(-x))
-
 
 
 #config
@@ -45,6 +42,9 @@ X = normalize_data(X)
 X_test_r = normalize_data(X_test_r)
 y_test = to_categorical(y_test, num_classes=2)
 
+#metric
+auc_roc = as_keras_metric(tf.metrics.auc)
+recall = as_keras_metric(tf.metrics.recall)
 
 for index, (train_indices, val_indices) in enumerate(skf.split(X, y)):
     print ("Training on fold " + str(index+1) + "/5...")
@@ -76,15 +76,17 @@ for index, (train_indices, val_indices) in enumerate(skf.split(X, y)):
     model.add(Dense(2, kernel_initializer=init, kernel_regularizer=reg))
     model.add(Activation('softmax'))
 
-    tbCallBack = TrainValTensorBoard(log_dir='./cnn/seed_{}/fold_{}/logs'.format(seed, index), histogram_freq=0, write_graph=True)
-    model.compile(loss='categorical_crossentropy',optimizer=Adam(),metrics=['accuracy'])
-
+    model.compile(loss='categorical_crossentropy',optimizer=Adam(),metrics=[auc_roc, recall])
+    print(model.metrics_names)
     nb_epoch = 10
+    tbCallBack = TrainValTensorBoard(log_dir='./cnn/seed_{}/fold_{}/logs'.format(seed, index), histogram_freq=0, write_graph=True)
+    ckptCallBack =  ModelCheckpoint(filepath='./lstm_balance/seed_{}/fold_{}/logs/best.h5'.format(seed, index), monitor='val_auc_roc', verbose=1, save_best_only=True, mode='max')
+
     model.fit(X_train_r, y_train, 
             epochs=nb_epoch, 
             validation_data=(X_val_r, y_val), 
             batch_size=32, 
-            callbacks=[tbCallBack], 
+            callbacks=[tbCallBack, ckptCallBack], 
             class_weight = {0: 0.5, 1: 9.5})
 
     #metrics
