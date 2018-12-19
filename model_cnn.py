@@ -14,7 +14,8 @@ from keras.initializers import glorot_uniform
 from keras.regularizers import l2
 from keras.models import model_from_json
 from sklearn.model_selection import StratifiedKFold
-from tensorboard import TrainValTensorBoard, ModelCheckpoint
+from tensorboard import TrainValTensorBoard
+from keras.callbacks import ModelCheckpoint
 from ultis import as_keras_metric, normalize_data
 
 seed = 1997
