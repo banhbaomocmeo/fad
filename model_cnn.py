@@ -17,9 +17,10 @@ from sklearn.model_selection import StratifiedKFold
 from tensorboard import TrainValTensorBoard
 from keras.callbacks import ModelCheckpoint
 from ultis import as_keras_metric, normalize_data
+from metrics import ultimate_metrics
 
 seed = 1997
-kfold_splits = 5
+kfold_splits = 2
 
 
 #config
@@ -81,18 +82,21 @@ for index, (train_indices, val_indices) in enumerate(skf.split(X, y)):
     print(model.metrics_names)
     nb_epoch = 10
     tbCallBack = TrainValTensorBoard(log_dir='./cnn/seed_{}/fold_{}/logs'.format(seed, index), histogram_freq=0, write_graph=True)
-    ckptCallBack =  ModelCheckpoint(filepath='./lstm_balance/seed_{}/fold_{}/logs/best.h5'.format(seed, index), monitor='val_auc_roc', verbose=1, save_best_only=True, mode='max')
+    ckptCallBack =  ModelCheckpoint(filepath='./lstm_balance/seed_{}/fold_{}/logs/best.h5'.format(seed, index), monitor='val_auc', verbose=1, save_best_only=True, mode='max')
 
     model.fit(X_train_r, y_train, 
             epochs=nb_epoch, 
             validation_data=(X_val_r, y_val), 
             batch_size=32, 
             callbacks=[tbCallBack, ckptCallBack], 
-            class_weight = {0: 0.5, 1: 9.5})
+            class_weight = {0: 1, 1: 9})
 
     #metrics
     y_pred = model.predict(X_test_r)
-    np.save('./cnn/seed_{}/fold_{}/pred.npy'.format(seed, index), [y_test, y_pred])
+    # np.save('./cnn/seed_{}/fold_{}/pred.npy'.format(seed, index), [y_test, y_pred])
+
+    sn, sp, acc, mcc, auc, fpr, tpr = ultimate_metrics(y_test, y_pred)
+    
 
     #save model
     model_json = model.to_json()
@@ -100,3 +104,4 @@ for index, (train_indices, val_indices) in enumerate(skf.split(X, y)):
         json_file.write(model_json)
     model.save_weights("./cnn/seed_{}/fold_{}/model.h5".format(seed, index))
     print("Saved model to disk")
+    print('sn: {}\nsp: {}\nacc: {}\nmcc: {}\nauc: {}\nfpr: {}\ntpr: {}'.format(sn, sp, acc, mcc, auc, fpr, tpr))
