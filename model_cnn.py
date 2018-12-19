@@ -47,6 +47,8 @@ y_test = to_categorical(y_test, num_classes=2)
 #metric
 auc_roc = as_keras_metric(tf.metrics.auc)
 recall = as_keras_metric(tf.metrics.recall)
+precision = as_keras_metric(tf.metrics.precision)
+
 
 for index, (train_indices, val_indices) in enumerate(skf.split(X, y)):
     print ("Training on fold " + str(index+1) + "/5...")
@@ -78,7 +80,7 @@ for index, (train_indices, val_indices) in enumerate(skf.split(X, y)):
     model.add(Dense(2, kernel_initializer=init, kernel_regularizer=reg))
     model.add(Activation('softmax'))
 
-    model.compile(loss='categorical_crossentropy',optimizer=Adam(),metrics=[auc_roc, recall])
+    model.compile(loss='categorical_crossentropy',optimizer=Adam(),metrics=[auc_roc, recall, precision])
     print(model.metrics_names)
     nb_epoch = 10
     tbCallBack = TrainValTensorBoard(log_dir='./cnn/seed_{}/fold_{}/logs'.format(seed, index), histogram_freq=0, write_graph=True)
